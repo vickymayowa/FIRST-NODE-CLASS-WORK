@@ -29,19 +29,19 @@ app.get("/signin",(req,res)=>{
   app.post("/user",(req,res)=>{
   console.log(req.body);
   let form = new userModel(req.body)
-  console.log(form);
+  console.log(form)
   form.save()
   .then((response)=>{
-      res.send("index",{message:"Registration Completed"})
-      console.log("successfully saved");
+    res.redirect("/signin")
+      res.render("index",{message:"Registration Completed"})
+      console.log("SuccessFully Saved into the Database");
       console.log(response)
       // res.render("index",{message:"Registration Completed"})
-      res.redirect("/signin")
   })
-  .catch((err)=>{
-      console.log(err);
-      if (err.code === 11000) {
-          console.log(err.code);
+  .catch((error)=>{
+      if (error.code === 11000) {
+          console.log(error.code);
+          console.log(error.email);
           res.render("index",{message:"Email already exist"})
       } else {
           res.render("index", {message:"Please fill in all fields"})
@@ -49,6 +49,42 @@ app.get("/signin",(req,res)=>{
   })
 })
 
+app.get("/dashboard", (req, res) => {
+  userModel.find()
+      .then((response) => {
+          console.log(response);
+          console.log("User Accessed the DashBoard")
+          res.render("dashboard", {response})
+      })
+      .catch((err) => {
+      console.log(err)
+  })
+})
+
+app.post("/delete",(req,res)=>{
+  userModel.findOneAndDelete({email:req.body.userEmail})
+  .then((response)=>{
+    console.log(response);
+    res.redirect("dashboard")
+    console.log("Deleted SuccessFully");
+    cosnoel.log("Admin Deleted A User")
+  })
+  .catch((error)=>{
+    console.log(error);
+  })
+})
+app.post("/signin", async (req,res) =>{
+  const { email, password } = req.body
+  const user = await userModel.findOne({ email })
+  if(user.password === password ){
+    res.render("signin", {message: "LOGIN SUCCESSFULLY"})
+    console.log("User Entered Valid Email And Password")
+    res.redirect("/dashboard")
+  } else {
+    res.render("signin", {message: "invalid Email or Password"})
+    console.log("User entered Wrong Details")
+  }
+})
 // app.post("/user", async (req,res)=>{
 //   try {
 //       const user = await userModel.create(req.body) 
@@ -68,6 +104,10 @@ app.get("/signin",(req,res)=>{
 //       console.log(error)
 //     }
 // })
+app.get("/dashboard",(req,res)=>{
+  res.render("/dashboard")
+  console.log("User Valid the DashBoard")
+})
 
         // set ejs as your view engine
 app.set('view engine','ejs')
@@ -81,7 +121,7 @@ app.get("/index",(req,res)=>{
 
     // creating a server code
 app.listen("3500",()=>{
-    console.log("Server Has Started<<<<<<<<>>>>>>>>")
+    console.log("Server Has Started<<<<<rs>>>>>")
     console.log("Server Started on port 3500")
 })
 
