@@ -22,6 +22,7 @@ let userSchema = {
     password:{type:String, required:true},
   }
 let userModel = mongoose.model("Users_Details", userSchema)
+
 app.get("/signin",(req,res)=>{
   res.render("signin",{message:""})
 })
@@ -33,15 +34,14 @@ app.get("/signin",(req,res)=>{
   form.save()
   .then((response)=>{
     res.redirect("/signin")
-      res.render("index",{message:"Registration Completed"})
-      console.log("SuccessFully Saved into the Database");
-      console.log(response)
-      // res.render("index",{message:"Registration Completed"})
+    res.render("index",{message:"Registration Completed"})
+    console.log("SuccessFully Saved into the Database");
+    console.log(response)
+    res.render("index",{message:"Registration Completed"})
   })
   .catch((error)=>{
       if (error.code === 11000) {
           console.log(error.code);
-          console.log(error.email);
           res.render("index",{message:"Email already exist"})
       } else {
           res.render("index", {message:"Please fill in all fields"})
@@ -60,6 +60,27 @@ app.get("/dashboard", (req, res) => {
       console.log(err)
   })
 })
+          // Edit User
+app.post("/edit",(req,res)=>{
+  userModel.findOne({email:req.body.userEmail})
+  .then((response)=>{
+      console.log(response);
+      res.render("editUser", {userDetails:response})
+  })
+})
+
+app.post("/update", (req,res)=>{
+  let id = req.body.id
+  userModel.findByIdAndUpdate(id, req.body)
+  .then((response)=>{
+      console.log(response);
+      res.redirect("dashboard")
+  })
+  .catch((err)=>{
+      console.log(err);
+  });
+})
+
 
 app.post("/delete",(req,res)=>{
   userModel.findOneAndDelete({email:req.body.userEmail})
@@ -67,15 +88,16 @@ app.post("/delete",(req,res)=>{
     console.log(response);
     res.redirect("dashboard")
     console.log("Deleted SuccessFully");
-    cosnoel.log("Admin Deleted A User")
+    console.log("Admin Deleted A User")
   })
   .catch((error)=>{
     console.log(error);
   })
 })
+
 app.post("/signin", async (req,res) =>{
   const { email, password } = req.body
-  const user = await userModel.findOne({ email })
+    const user = await userModel.findOne({ email })
   if(user.password === password ){
     res.render("signin", {message: "LOGIN SUCCESSFULLY"})
     console.log("User Entered Valid Email And Password")
@@ -85,25 +107,7 @@ app.post("/signin", async (req,res) =>{
     console.log("User entered Wrong Details")
   }
 })
-// app.post("/user", async (req,res)=>{
-//   try {
-//       const user = await userModel.create(req.body) 
-//       if(user) {
-//         res.render("index",{message:"Registered SuccessFully"})
-//         console.log(user)
-//         res.redirect("/signin")
-//               if (error.code === 11000) {
-//         res.render("index",{message:"Email already exist"})
-//         console.log(error.email);
-//      } else {
-//       res.render("index", {message:"Please fill in all fields"})
-//       // console.log("User Didnt fill all fields");
-//         }
-//     }   
-//     } catch (error) {
-//       console.log(error)
-//     }
-// })
+
 app.get("/dashboard",(req,res)=>{
   res.render("/dashboard")
   console.log("User Valid the DashBoard")
@@ -117,7 +121,6 @@ app.get("/index",(req,res)=>{
     // res.send('Hello coming from the backend')
     res.render('index', {message: ''})
 })
-    // calling on body parser
 
     // creating a server code
 app.listen("3500",()=>{
