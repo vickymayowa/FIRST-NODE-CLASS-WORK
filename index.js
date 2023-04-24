@@ -65,7 +65,7 @@ app.post("/edit",(req,res)=>{
   userModel.findOne({email:req.body.userEmail})
   .then((response)=>{
       console.log(response);
-      res.render("editUser", {userDetails:response})
+      res.render("editUser", {response:response})
   })
 })
 
